@@ -2,20 +2,7 @@ function handleStop () {
     bitbot.setLedColor(0xFF0000)
     bitbot.stop(BBStopMode.Coast)
 }
-function handleForward (num: number) {
-    forward = num / 10
-    if (forward > 0) {
-        bitbot.setPixelColor(5, 0x00FF00)
-        bitbot.setPixelColor(11, 0x00FF00)
-        bitbot.go(BBDirection.Forward, forward)
-    } else {
-        bitbot.setPixelColor(0, 0xFF0000)
-        bitbot.setPixelColor(6, 0xFF0000)
-        bitbot.go(BBDirection.Reverse, Math.abs(forward))
-    }
-}
-function handleTurn (num: number) {
-    turn = num / 10
+function handleTurn (turn: number) {
     if (turn > 0) {
         for (let index = 0; index <= 5; index++) {
             bitbot.setPixelColor(index + 6, 0xFFFF00)
@@ -32,18 +19,31 @@ radio.onReceivedValue(function (name, value) {
     if (name.includes("stop")) {
         handleStop()
     }
-    if (Math.abs(value) > 200) {
-        bitbot.ledClear()
+    bitbot.ledClear()
+    sensitivity = 20
+    percentValue = Math.map(value, -1023, 1023, -100, 100)
+    if (Math.abs(percentValue) > sensitivity) {
         if (name.includes("forward")) {
-            handleForward(forward)
+            handleStraight(percentValue)
         }
         if (name.includes("turn")) {
-            handleTurn(value)
+            handleTurn(percentValue)
         }
     }
 })
-let turn = 0
-let forward = 0
+function handleStraight (forward: number) {
+    if (forward > 0) {
+        bitbot.setPixelColor(5, 0x00FF00)
+        bitbot.setPixelColor(11, 0x00FF00)
+        bitbot.go(BBDirection.Forward, forward)
+    } else {
+        bitbot.setPixelColor(0, 0xFF0000)
+        bitbot.setPixelColor(6, 0xFF0000)
+        bitbot.go(BBDirection.Reverse, Math.abs(forward))
+    }
+}
+let percentValue = 0
+let sensitivity = 0
 radio.setGroup(1)
 basic.showIcon(IconNames.Happy)
 bitbot.setLedColor(0x00FF00)
