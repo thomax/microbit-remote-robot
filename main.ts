@@ -20,7 +20,6 @@ radio.onReceivedValue(function (name, value) {
         handleStop()
     }
     bitbot.ledClear()
-    sensitivity = 20
     percentValue = Math.map(value, -1023, 1023, -100, 100)
     if (Math.abs(percentValue) > sensitivity) {
         if (name.includes("forward")) {
@@ -44,6 +43,7 @@ function handleStraight (forward: number) {
 }
 let percentValue = 0
 let sensitivity = 0
-radio.setGroup(1)
+radio.setGroup(51)
 basic.showIcon(IconNames.Happy)
 bitbot.setLedColor(0x00FF00)
+sensitivity = 20
