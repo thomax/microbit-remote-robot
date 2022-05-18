@@ -1,27 +1,40 @@
+function handleStart () {
+    running = true
+    soundExpression.soaring.play()
+    basic.showIcon(IconNames.Happy)
+    bitbot.setLedColor(0x00FF00)
+}
 function handleStop () {
+    running = false
+    soundExpression.yawn.play()
+    basic.showIcon(IconNames.No)
     bitbot.setLedColor(0xFF0000)
     bitbot.stop(BBStopMode.Coast)
 }
 function handleTurn (turn: number) {
     if (turn > 0) {
+        bitbot.rotate(BBRobotDirection.Right, turn)
         for (let index = 0; index <= 5; index++) {
             bitbot.setPixelColor(index + 6, 0xFFFF00)
         }
-        bitbot.rotate(BBRobotDirection.Right, turn)
     } else {
+        bitbot.rotate(BBRobotDirection.Left, Math.abs(turn))
         for (let index = 0; index <= 5; index++) {
             bitbot.setPixelColor(index, 0xFFFF00)
         }
-        bitbot.rotate(BBRobotDirection.Left, Math.abs(turn))
     }
 }
 radio.onReceivedValue(function (name, value) {
-    if (name.includes("stop")) {
-        handleStop()
+    if (name.includes("running")) {
+        if (value == 1) {
+            handleStart()
+        } else {
+            handleStop()
+        }
     }
-    bitbot.ledClear()
-    percentValue = Math.map(value, -1023, 1023, -100, 100)
-    if (Math.abs(percentValue) > sensitivity) {
+    if (running) {
+        bitbot.ledClear()
+        percentValue = Math.map(value, -1023, 1023, -100, 100)
         if (name.includes("forward")) {
             handleStraight(percentValue)
         }
@@ -32,18 +45,16 @@ radio.onReceivedValue(function (name, value) {
 })
 function handleStraight (forward: number) {
     if (forward > 0) {
+        bitbot.go(BBDirection.Forward, forward)
         bitbot.setPixelColor(5, 0x00FF00)
         bitbot.setPixelColor(11, 0x00FF00)
-        bitbot.go(BBDirection.Forward, forward)
     } else {
-        bitbot.setPixelColor(0, 0xFF0000)
-        bitbot.setPixelColor(6, 0xFF0000)
         bitbot.go(BBDirection.Reverse, Math.abs(forward))
+        bitbot.setPixelColor(0, 0x00FF00)
+        bitbot.setPixelColor(6, 0x00FF00)
     }
 }
 let percentValue = 0
-let sensitivity = 0
-radio.setGroup(51)
-basic.showIcon(IconNames.Happy)
-bitbot.setLedColor(0x00FF00)
-sensitivity = 20
+let running = false
+radio.setGroup(91)
+handleStop()
